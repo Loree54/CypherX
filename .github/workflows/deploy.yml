@@ -1,26 +1,37 @@
-name: WhatsApp Bot Hosting
+name: WhatsApp Bot
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+  push:
+  schedule:
+    - cron: "0 */5 * * *" # Restart every 5 hours to avoid the 6-hour timeout
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Start bot
-      run: node index.js
+      - name: Load environment variables
+        run: |
+          if [ -f .env ]; then
+            export $(cat .env | xargs)
+          fi
+        shell: bash
+
+      - name: Run bot
+        env:
+          SESSION_ID: ${{ secrets.SESSION_ID }}
+        run: |
+          echo "Starting bot..."
+          node index.js
