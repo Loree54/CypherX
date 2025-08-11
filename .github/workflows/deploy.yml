@@ -1,37 +1,17 @@
-name: WhatsApp Bot
+name: Auto & Manual Restart
 
 on:
-  workflow_dispatch:
-  push:
+  workflow_dispatch:       # Allows manual trigger
+  push:                    # Restarts on push
   schedule:
-    - cron: "0 */5 * * *" # Restart every 5 hours to avoid the 6-hour timeout
+    - cron: "0 */6 * * *"  # Auto restart every 6 hours (UTC time)
 
 jobs:
-  run-bot:
+  restart:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Load environment variables
+      - name: Restart Service
         run: |
-          if [ -f .env ]; then
-            export $(cat .env | xargs)
-          fi
-        shell: bash
-
-      - name: Run bot
-        env:
-          SESSION_ID: ${{ secrets.SESSION_ID }}
-        run: |
-          echo "Starting bot..."
-          node index.js
+          echo "Restarting service..."
+          # Put your restart commands here
+          # Example: pm2 restart app_name
