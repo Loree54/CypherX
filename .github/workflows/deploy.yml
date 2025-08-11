@@ -1,30 +1,34 @@
-name: WhatsApp Bot Auto Deploy
+name: WhatsApp Bot
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:          # Manual trigger
+  push:
+    branches: ["main"]
   schedule:
-    - cron: "0 */6 * * *" # Runs every 6 hours
+    - cron: "0 */6 * * *"     # Restart every 6 hours
+
+permissions:
+  contents: read
 
 jobs:
-  deploy:
+  run-bot:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
 
-      - name: Create .env file
-        run: |
-          echo "SESSION_ID=${{ secrets.SESSION_ID }}" >> .env
-
-      - name: Start WhatsApp bot
-        run: |
-          npm start
+      - name: Run bot
+        run: node index.js
+        env:
+          SESSION_ID: ${{ secrets.SESSION_ID }}
+          OWNER_NUMBER: ${{ secrets.OWNER_NUMBER }}
+          # Add any other bot environment variables here
